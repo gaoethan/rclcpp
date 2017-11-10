@@ -109,15 +109,15 @@ public:
     typename Alloc = std::allocator<void>,
     typename SubscriptionT =
     rclcpp::subscription::Subscription<rcl_interfaces::msg::ParameterEvent, Alloc>>
-  typename rclcpp::subscription::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr
+  typename SubscriptionT::SharedPtr
   on_parameter_event(CallbackT && callback)
   {
     using rclcpp::message_memory_strategy::MessageMemoryStrategy;
     auto msg_mem_strat =
       MessageMemoryStrategy<rcl_interfaces::msg::ParameterEvent, Alloc>::create_default();
 
-    return rclcpp::create_subscription<
-      rcl_interfaces::msg::ParameterEvent, CallbackT, Alloc, SubscriptionT>(
+    return rclcpp::create_subscription_with_factory<
+      rcl_interfaces::msg::ParameterEvent, CallbackT, Alloc, rcl_interfaces::msg::ParameterEvent, SubscriptionT>(
       this->node_topics_interface_.get(),
       "parameter_events",
       std::forward<CallbackT>(callback),
