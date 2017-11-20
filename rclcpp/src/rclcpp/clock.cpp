@@ -130,13 +130,16 @@ Clock::get_triggered_callback_handlers(const TimeJump & jump)
 {
   std::vector<JumpHandler::SharedPtr> callbacks;
   std::lock_guard<std::mutex> guard(callback_list_mutex_);
-  for (auto wjcb = active_jump_handlers_.begin(); wjcb != active_jump_handlers_.end(); wjcb++) {
+  for (auto wjcb = active_jump_handlers_.begin(); wjcb != active_jump_handlers_.end(); ) {
     if (auto jcb = wjcb->lock()) {
       if (jcb->notice_threshold.is_exceeded(jump)) {
         callbacks.push_back(jcb);
       }
+      // Step the iterator
+      wjcb++;
     } else {
-      active_jump_handlers_.erase(wjcb);
+      // Move the iterator after the erase.
+      wjcb = active_jump_handlers_.erase(wjcb);
     }
   }
   return callbacks;
